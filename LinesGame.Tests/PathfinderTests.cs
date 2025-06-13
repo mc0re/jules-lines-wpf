@@ -71,10 +71,53 @@ namespace LinesGame.Tests
         [TestMethod]
         public void Test_GetPath_BlockedPath_ReturnsNull()
         {
-            // Arrange
-            var obstacles = new List<(int r, int c, Color color)> { (0, 1, Colors.Red) };
+            // Arrange: Start (0,0), End (0,2)
+            // Obstacles to make sure no path exists between (0,0) and (0,2)
+            // Block direct path (0,1)
+            // Block paths "below": (1,0), (1,1), (1,2)
+            // Block paths "above": not possible as row 0 is edge
+            // To truly block, we need to consider the default 9x9 board.
+            // If we block (0,1), (1,0), (1,1), (1,2), a path can still go (2,0)->(2,1)->(2,2) etc.
+            // A simpler way to ensure no path is to create a "U" shape of obstacles around the start or end.
+            // Let's wall off (0,0) from (0,2) more completely.
+            var obstacles = new List<(int r, int c, Color color)>
+            {
+                (0, 1, Colors.Red), // Block direct path
+                (1, 0, Colors.Red), // Block potential path point
+                (1, 1, Colors.Red), // Block potential path point
+                (1, 2, Colors.Red)  // Block potential path point
+                // On a 9x9 board, (0,0) can still reach (0,2) via (2,0)->(2,1)->(2,2) -> ... -> (any_row,0)->(any_row,1)->(any_row,2)
+                // This test, as originally conceived with a single obstacle, was flawed in its expectation of null.
+                // The "Test_GetPath_NoPathExists_ReturnsNull" is better for complete blockage.
+                // Let's adjust this test to be a clear case of a small local blockage that FORCES a specific detour,
+                // or if that detour is also blocked, then it becomes null.
+                // For this fix, we'll make it definitively null by blocking all immediate alternative routes.
+                // S(0,0) E(0,2). Obstacles: (0,1) [direct], (1,1) [blocks (0,0)->(1,0)->(1,1)->(1,2)->(0,2)]
+                // If we also block (1,0) and (1,2), then it should be null.
+                // This is essentially the same as Test_GetPath_NoPathExists_ReturnsNull for S(0,0) if E is far enough.
+                // Let's simplify the "BlockedPath" to mean a truly inescapable situation for a short path.
+                // Start (1,1), End (1,3). Obstacles: (1,2) [direct], (0,1),(0,2),(0,3) [above], (2,1),(2,2),(2,3) [below]
+            };
+            obstacles = new List<(int r, int c, Color color)>
+            {
+                (1,2, Colors.Red), // direct
+                (0,1, Colors.Red), (0,2, Colors.Red), (0,3, Colors.Red), // above
+                (2,1, Colors.Red), (2,2, Colors.Red), (2,3, Colors.Red)  // below
+            };
             GameBoard board = CreateBoardWithObstacles(obstacles);
-            Cell startCell = GetCell(board, 0, 0);
+            Cell startCell = GetCell(board, 1, 1);
+            Cell endCell = GetCell(board, 1, 3);
+
+
+            // Act
+            List<Cell>? path = Pathfinder.GetPath(board, startCell, endCell);
+
+            // Assert
+            Assert.IsNull(path, "BlockedPath: Path should be null when completely blocked by surrounding obstacles.");
+        }
+
+        [TestMethod]
+        public void Test_GetPath_NoPathExists_ReturnsNull()
             Cell endCell = GetCell(board, 0, 2);
 
             // Act
