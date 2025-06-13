@@ -64,9 +64,6 @@
                                 <Ellipse.RenderTransform>
                                     <TranslateTransform Y="0"/>
                                 </Ellipse.RenderTransform>
-                                <Ellipse.RenderTransform>
-                                    <TranslateTransform Y="0"/>
-                                </Ellipse.RenderTransform>
 
                                 <Ellipse.Resources>
                                     <Storyboard x:Key="sb_JumpAnimation" RepeatBehavior="Forever" AutoReverse="True">
