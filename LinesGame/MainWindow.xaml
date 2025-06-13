@@ -26,8 +26,8 @@
         <!-- Game Board Area -->
         <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
             <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5"
-                          VerticalAlignment="Top" HorizontalAlignment="Left">
-                          <!-- Explicitly set alignment if not stretching, to match canvas behavior -->
+                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                          MinWidth="360" MinHeight="360">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
                         <Setter Property="IsEnabled" Value="{Binding IsGameOver, Converter={StaticResource InverseBooleanConverter}}"/>
@@ -58,7 +58,7 @@
                                 </Style>
                             </Border.Style>
                             <Ellipse x:Name="ballEllipse"
-                                     Width="28" Height="28"
+                                     Width="30" Height="30"
                                      HorizontalAlignment="Center" VerticalAlignment="Center"
                                      Visibility="{Binding IsBallVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Ellipse.Fill>
@@ -91,13 +91,19 @@
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <DataTrigger.EnterActions>
+                                                <!-- <DataTrigger.EnterActions>
                                                     <BeginStoryboard Storyboard="{StaticResource sb_JumpAnimation}" x:Name="bs_Selected_JumpAnimOn" />
                                                 </DataTrigger.EnterActions>
                                                 <DataTrigger.ExitActions>
                                                     <StopStoryboard BeginStoryboardName="bs_Selected_JumpAnimOn"/>
                                                     <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" x:Name="bs_Selected_JumpAnimOffReset"/>
-                                                </DataTrigger.ExitActions>
+                                                </DataTrigger.ExitActions> -->
+                                                <!-- Add simple setters for diagnostics -->
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </DataTrigger>
+                                            <!-- Add a corresponding trigger to revert the diagnostic change when IsSelected is False -->
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                                <Setter Property="Opacity" Value="1.0"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -115,12 +121,12 @@
             </ItemsControl>
 
             <Canvas x:Name="animationCanvas" IsHitTestVisible="False"
-                    VerticalAlignment="{Binding ElementName=GameBoardItemsControl, Path=VerticalAlignment}"
-                    HorizontalAlignment="{Binding ElementName=GameBoardItemsControl, Path=HorizontalAlignment}"
+                    VerticalAlignment="Stretch" <!-- Match ItemsControl -->
+                    HorizontalAlignment="Stretch" <!-- Match ItemsControl -->
                     Width="{Binding ElementName=GameBoardItemsControl, Path=ActualWidth}"
                     Height="{Binding ElementName=GameBoardItemsControl, Path=ActualHeight}"
                     Margin="{Binding ElementName=GameBoardItemsControl, Path=Margin}"
-                    ClipToBounds="False"> <!-- Allow drawing outside bounds if necessary, though proper sizing is key -->
+                    ClipToBounds="False">
             </Canvas>
 
             <TextBlock Text="Game Over!"
