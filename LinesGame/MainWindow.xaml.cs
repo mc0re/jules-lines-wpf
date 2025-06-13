@@ -51,14 +51,15 @@ namespace LinesGame
             }
         }
 
-        private async Task AnimateBallMove(Cell sourceCell, Cell targetCell, List<Cell> path)
+        private async Task AnimateBallMove(Cell sourceCell, Cell targetCell, List<Cell> fullPath) // Renamed 'path' to 'fullPath'
         {
-            if (path == null || path.Count < 2)
+            if (fullPath == null || fullPath.Count < 2)
             {
-                // Invalid path or no steps to take, reset selection and path highlight
+                // Invalid path or no movement needed, clean up selection
                 ClearCurrentPathVisualization();
                 if (SelectedBallCell != null) SelectedBallCell.IsSelected = false;
                 SelectedBallCell = null;
+                GameBoardItemsControl.IsEnabled = true; // Re-enable if disabled early
                 return;
             }
 
@@ -66,72 +67,82 @@ namespace LinesGame
 
             Ellipse ghostBall = new Ellipse
             {
-                Width = 30, // Updated to 30
-                Height = 30, // Updated to 30
+                Width = 30, Height = 30,
                 Fill = new SolidColorBrush(sourceCell.Color),
-                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF333333")), // Dark Gray
-                StrokeThickness = 0.75,
+                Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF333333")),
+                StrokeThickness = 0.75
             };
 
             double cellWidth = GameBoardItemsControl.ActualWidth / GameBoard.GridColumns;
             double cellHeight = GameBoardItemsControl.ActualHeight / GameBoard.GridRows;
 
-            double startX = sourceCell.Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
-            double startY = sourceCell.Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
-            Canvas.SetLeft(ghostBall, startX);
-            Canvas.SetTop(ghostBall, startY);
+            double initialX = fullPath[0].Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
+            double initialY = fullPath[0].Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
+            Canvas.SetLeft(ghostBall, initialX);
+            Canvas.SetTop(ghostBall, initialY);
             animationCanvas.Children.Add(ghostBall);
-
             sourceCell.IsBallVisible = false;
 
-            // Loop through path segments for animation
-            for (int i = 0; i < path.Count - 1; i++)
+            PathGeometry animationPathGeometry = new PathGeometry();
+            PathFigure pathFigure = new PathFigure { StartPoint = new Point(initialX, initialY) };
+            PolyLineSegment polyLineSegment = new PolyLineSegment();
+
+            for (int i = 1; i < fullPath.Count; i++)
             {
-                Cell currentSegmentEndCell = path[i+1];
-                double targetX = currentSegmentEndCell.Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
-                double targetY = currentSegmentEndCell.Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
-
-                DoubleAnimation animX = new DoubleAnimation(targetX, new Duration(TimeSpan.FromSeconds(0.15)));
-                DoubleAnimation animY = new DoubleAnimation(targetY, new Duration(TimeSpan.FromSeconds(0.15)));
-
-                TaskCompletionSource<bool> segmentTcs = new TaskCompletionSource<bool>();
-                int animationsCompleted = 0;
-                EventHandler onAnimationCompleted = (s, e) =>
-                {
-                    animationsCompleted++;
-                    if (animationsCompleted == 2)
-                    {
-                        segmentTcs.TrySetResult(true);
-                    }
-                };
-                animX.Completed += onAnimationCompleted;
-                animY.Completed += onAnimationCompleted;
-
-                ghostBall.BeginAnimation(Canvas.LeftProperty, animX);
-                ghostBall.BeginAnimation(Canvas.TopProperty, animY);
-
-                await segmentTcs.Task; // Wait for current segment animation
+                double pointX = fullPath[i].Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
+                double pointY = fullPath[i].Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
+                polyLineSegment.Points.Add(new Point(pointX, pointY));
+            }
+            pathFigure.Segments.Add(polyLineSegment);
+            animationPathGeometry.Figures.Add(pathFigure);
+            if (animationPathGeometry.CanFreeze) // Check before freezing
+            {
+                animationPathGeometry.Freeze();
             }
 
-            animationCanvas.Children.Remove(ghostBall);
 
-            // Finalize move logic (targetCell is the end of the path)
+            double durationPerSegment = 0.15; // seconds
+            Duration animationDuration = new Duration(TimeSpan.FromSeconds((fullPath.Count - 1) * durationPerSegment));
+
+            DoubleAnimationUsingPath animX = new DoubleAnimationUsingPath
+            {
+                PathGeometry = animationPathGeometry,
+                Source = PathAnimationSource.X,
+                Duration = animationDuration
+            };
+
+            DoubleAnimationUsingPath animY = new DoubleAnimationUsingPath
+            {
+                PathGeometry = animationPathGeometry,
+                Source = PathAnimationSource.Y,
+                Duration = animationDuration
+            };
+
+            var tcs = new TaskCompletionSource<bool>();
+            EventHandler? onAnimationCompleted = null;
+            onAnimationCompleted = (s, e) => {
+                animY.Completed -= onAnimationCompleted; // Unsubscribe
+                tcs.TrySetResult(true);
+            };
+            animY.Completed += onAnimationCompleted;
+
+            ghostBall.BeginAnimation(Canvas.LeftProperty, animX);
+            ghostBall.BeginAnimation(Canvas.TopProperty, animY);
+
+            await tcs.Task;
+
+            animationCanvas.Children.Remove(ghostBall);
             targetCell.Color = sourceCell.Color;
             sourceCell.Color = Colors.Transparent;
-
             sourceCell.IsBallVisible = true;
-            targetCell.IsBallVisible = true;  // targetCell is path.Last()
+            targetCell.IsBallVisible = true;
 
-            // Path visualization is cleared at the very end, after game logic
-            // ClearCurrentPathVisualization(); // Moved to the end
-
-            if (SelectedBallCell != null)  // SelectedBallCell is sourceCell
+            if (SelectedBallCell == sourceCell)
             {
                 SelectedBallCell.IsSelected = false;
             }
             SelectedBallCell = null;
 
-            // Use targetCell, which is path.Last() and the actual destination of the move.
             List<Cell> linesFound = Game.CheckForLines(targetCell);
             if (linesFound.Count > 0)
             {
@@ -142,7 +153,6 @@ namespace LinesGame
                 Game.PlaceNextBallsAndGenerateNew();
             }
 
-            // Clear path visualization after all game logic for the turn is complete.
             ClearCurrentPathVisualization();
 
             if (!Game.IsGameOver)

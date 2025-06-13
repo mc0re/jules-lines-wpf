@@ -24,7 +24,7 @@
 
         <!-- Game Board Area -->
         <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
-            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5"
+            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="0"
                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                           MinWidth="360" MinHeight="360">
                 <ItemsControl.Style>
@@ -88,17 +88,13 @@
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <!-- <DataTrigger.EnterActions>
+                                                <DataTrigger.EnterActions>
                                                     <BeginStoryboard Storyboard="{StaticResource sb_JumpAnimation}" x:Name="bs_Selected_JumpAnimOn" />
                                                 </DataTrigger.EnterActions>
                                                 <DataTrigger.ExitActions>
                                                     <StopStoryboard BeginStoryboardName="bs_Selected_JumpAnimOn"/>
                                                     <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" x:Name="bs_Selected_JumpAnimOffReset"/>
-                                                </DataTrigger.ExitActions> -->
-                                                <Setter Property="Opacity" Value="0.5"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
-                                                <Setter Property="Opacity" Value="1.0"/>
+                                                </DataTrigger.ExitActions>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -121,7 +117,8 @@
                     Width="{Binding ElementName=GameBoardItemsControl, Path=ActualWidth}"
                     Height="{Binding ElementName=GameBoardItemsControl, Path=ActualHeight}"
                     Margin="{Binding ElementName=GameBoardItemsControl, Path=Margin}"
-                    ClipToBounds="False">
+                    ClipToBounds="False"
+                    Background="#33FF0000"> <!-- Bright Red, semi-transparent for diagnosis -->
             </Canvas>
 
             <TextBlock Text="Game Over!"
