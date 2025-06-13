@@ -118,33 +118,26 @@ namespace LinesGame.Tests
 
         [TestMethod]
         public void Test_GetPath_NoPathExists_ReturnsNull()
-            Cell endCell = GetCell(board, 0, 2);
-
-            // Act
-            List<Cell>? path = Pathfinder.GetPath(board, startCell, endCell);
-
-            // Assert
-            Assert.IsNull(path, "BlockedPath: Path should be null when directly blocked.");
-        }
-
-        [TestMethod]
-        public void Test_GetPath_NoPathExists_ReturnsNull()
         {
-            // Arrange
-            var obstacles = new List<(int r, int c, Color color)>
+            // Arrange: Create two disconnected regions by a solid wall of obstacles.
+            // Region 1: e.g., row 0 and 1
+            // Obstacle Wall: entire row 2
+            // Region 2: e.g., row 3 and 4
+            var obstacles = new List<(int r, int c, Color color)>();
+            for (int col = 0; col < GameBoard.GridColumns; col++) // Assuming GameBoard.GridColumns (9)
             {
-                (0, 1, Colors.Red), // Wall right of start
-                (1, 0, Colors.Red)  // Wall below start
-            };
+                obstacles.Add((2, col, Colors.Red)); // A solid wall at row 2
+            }
             GameBoard board = CreateBoardWithObstacles(obstacles);
-            Cell startCell = GetCell(board, 0, 0);
-            Cell endCell = GetCell(board, 2, 2); // Some distant cell
+
+            Cell startCell = GetCell(board, 0, 0); // In region 1 (above the wall)
+            Cell endCell = GetCell(board, 3, 0);   // In region 2 (below the wall)
 
             // Act
             List<Cell>? path = Pathfinder.GetPath(board, startCell, endCell);
 
             // Assert
-            Assert.IsNull(path, "NoPathExists: Path should be null when start is walled off.");
+            Assert.IsNull(path, "Path should be null when start and end are in disconnected regions separated by a wall.");
         }
 
         [TestMethod]
