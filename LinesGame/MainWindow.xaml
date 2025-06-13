@@ -4,8 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinesGame"
+        xmlns:local_converters="clr-namespace:LinesGame.Converters"
         mc:Ignorable="d"
         Title="Lines Game" Height="500" Width="750" MinWidth="450" MinHeight="400">
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <local_converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" /> <!-- Game area -->
@@ -17,16 +24,12 @@
         </Grid.ColumnDefinitions>
 
         <!-- Game Board Area -->
-        <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0"> <!-- Added margin to separate from side panel -->
-            <ItemsControl ItemsSource="{Binding Cells}" Margin="5">
+        <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
+            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
-                        <Setter Property="IsEnabled" Value="True"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsGameOver}" Value="True">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
+                        <!-- IsEnabled is now bound to NOT IsGameOver from the DataContext (Game) -->
+                        <Setter Property="IsEnabled" Value="{Binding IsGameOver, Converter={StaticResource InverseBooleanConverter}}"/>
                     </Style>
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
@@ -39,68 +42,82 @@
                         <Border BorderThickness="0.5" MouseLeftButtonDown="Cell_MouseLeftButtonDown">
                              <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="BorderBrush" Value="Gray"/> <!-- Darker, more subtle border -->
+                                    <Setter Property="BorderBrush" Value="Gray"/>
                                     <Setter Property="BorderThickness" Value="0.5"/>
+                                    <Setter Property="Background" Value="Transparent"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="BorderBrush" Value="CornflowerBlue"/> <!-- More appealing selection color -->
+                                            <Setter Property="BorderBrush" Value="CornflowerBlue"/>
                                             <Setter Property="BorderThickness" Value="2"/>
+                                        </DataTrigger>
+                                         <DataTrigger Binding="{Binding IsPathHighlight}" Value="True">
+                                            <Setter Property="Background" Value="#33FFFF00"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <Ellipse Width="30" Height="30" Margin="2" x:Name="ballEllipse"> <!-- Increased margin slightly -->
+                            <Ellipse Width="30" Height="30" Margin="2" x:Name="ballEllipse"
+                                     Visibility="{Binding IsBallVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{Binding Color, FallbackValue=Transparent, TargetNullValue=Transparent}"/>
+                                </Ellipse.Fill>
                                 <Ellipse.RenderTransform>
                                     <TranslateTransform Y="0"/>
                                 </Ellipse.RenderTransform>
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
-                                        <Setter Property="Fill" Value="Transparent"/>
-                                        <Setter Property="Stroke" Value="DarkGray"/> <!-- Default stroke for all ellipses -->
+                                        <Setter Property="Stroke" Value="DarkGray"/>
                                         <Setter Property="StrokeThickness" Value="0.5"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HasBall}" Value="True">
-                                                <Setter Property="Fill">
-                                                    <Setter.Value>
-                                                        <SolidColorBrush Color="{Binding Color}"/>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <!-- Change stroke for balls to make them pop a bit more -->
                                                 <Setter Property="Stroke" Value="Black"/>
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <DataTrigger.EnterActions>
-                                                    <BeginStoryboard x:Name="jumpAnimationStoryboard">
-                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                                            <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                             To="-5" Duration="0:0:0.3" />
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.EnterActions>
-                                                <DataTrigger.ExitActions>
-                                                    <StopStoryboard BeginStoryboardName="jumpAnimationStoryboard"/>
-                                                    <BeginStoryboard>
-                                                        <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                             To="0" Duration="0:0:0.01" />
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.ExitActions>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Ellipse.Style>
+                                <Ellipse.Triggers>
+                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                         <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                                 To="0" Duration="0:0:0.01" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard x:Name="JumpAnimOn">
+                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                    <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                                     To="-5" Duration="0:0:0.3" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <StopStoryboard BeginStoryboardName="JumpAnimOn" />
+                                            <BeginStoryboard x:Name="JumpAnimOffReset">
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                                     To="0" Duration="0:0:0.01" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Ellipse.Triggers>
                             </Ellipse>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
+            <Canvas x:Name="animationCanvas" IsHitTestVisible="False"/>
+
             <TextBlock Text="Game Over!"
-                       FontSize="48" FontWeight="Bold" Foreground="DarkRed" <!-- Slightly darker Red -->
+                       FontSize="48" FontWeight="Bold" Foreground="DarkRed"
                        HorizontalAlignment="Center" VerticalAlignment="Center"
                        IsHitTestVisible="False">
                 <TextBlock.Style>

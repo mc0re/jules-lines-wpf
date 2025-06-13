@@ -10,6 +10,8 @@ namespace LinesGame
         private int _column;
         private Color _color;
         private bool _isSelected;
+        private bool _isPathHighlight;
+        private bool _isBallVisible = true; // Default to true
 
         public int Row
         {
@@ -61,6 +63,32 @@ namespace LinesGame
                 if (_isSelected != value)
                 {
                     _isSelected = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsPathHighlight
+        {
+            get => _isPathHighlight;
+            set
+            {
+                if (_isPathHighlight != value)
+                {
+                    _isPathHighlight = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsBallVisible
+        {
+            get => _isBallVisible;
+            set
+            {
+                if (_isBallVisible != value)
+                {
+                    _isBallVisible = value;
                     OnPropertyChanged();
                 }
             }
