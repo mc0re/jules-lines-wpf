@@ -25,10 +25,11 @@
 
         <!-- Game Board Area -->
         <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
-            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5">
+            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5"
+                          VerticalAlignment="Top" HorizontalAlignment="Left">
+                          <!-- Explicitly set alignment if not stretching, to match canvas behavior -->
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
-                        <!-- IsEnabled is now bound to NOT IsGameOver from the DataContext (Game) -->
                         <Setter Property="IsEnabled" Value="{Binding IsGameOver, Converter={StaticResource InverseBooleanConverter}}"/>
                     </Style>
                 </ItemsControl.Style>
@@ -56,7 +57,9 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <Ellipse Width="30" Height="30" Margin="2" x:Name="ballEllipse"
+                            <Ellipse x:Name="ballEllipse"
+                                     Width="30" Height="30"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
                                      Visibility="{Binding IsBallVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Ellipse.Fill>
                                     <SolidColorBrush Color="{Binding Color, FallbackValue=Transparent, TargetNullValue=Transparent}"/>
@@ -78,11 +81,13 @@
 
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
-                                        <Setter Property="Stroke" Value="DarkGray"/>
-                                        <Setter Property="StrokeThickness" Value="0.5"/>
+                                        <!-- Default state (empty cell) - No visible stroke -->
+                                        <Setter Property="Stroke" Value="Transparent"/>
+                                        <Setter Property="StrokeThickness" Value="0"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HasBall}" Value="True">
-                                                <Setter Property="Stroke" Value="Black"/>
+                                                <!-- Stroke for actual balls -->
+                                                <Setter Property="Stroke" Value="#FF333333"/> <!-- Dark Gray -->
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
@@ -109,7 +114,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <Canvas x:Name="animationCanvas" IsHitTestVisible="False"/>
+            <Canvas x:Name="animationCanvas" IsHitTestVisible="False"
+                    VerticalAlignment="{Binding ElementName=GameBoardItemsControl, Path=VerticalAlignment}"
+                    HorizontalAlignment="{Binding ElementName=GameBoardItemsControl, Path=HorizontalAlignment}"
+                    Width="{Binding ElementName=GameBoardItemsControl, Path=ActualWidth}"
+                    Height="{Binding ElementName=GameBoardItemsControl, Path=ActualHeight}"
+                    Margin="{Binding ElementName=GameBoardItemsControl, Path=Margin}"
+                    ClipToBounds="False"> <!-- Allow drawing outside bounds if necessary, though proper sizing is key -->
+            </Canvas>
 
             <TextBlock Text="Game Over!"
                        FontSize="48" FontWeight="Bold" Foreground="DarkRed"
