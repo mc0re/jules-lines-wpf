@@ -101,7 +101,7 @@ namespace LinesGame
             }
 
 
-            double durationPerSegment = 0.15; // seconds
+            double durationPerSegment = 0.195; // seconds (0.15 * 1.3 = 0.195)
             Duration animationDuration = new Duration(TimeSpan.FromSeconds((fullPath.Count - 1) * durationPerSegment));
 
             DoubleAnimationUsingPath animX = new DoubleAnimationUsingPath

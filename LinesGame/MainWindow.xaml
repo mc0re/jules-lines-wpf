@@ -26,7 +26,8 @@
         <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
             <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="0"
                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                          MinWidth="360" MinHeight="360">
+                          MinWidth="360" MinHeight="360"
+                          BorderThickness="0" Padding="0">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
                         <Setter Property="IsEnabled" Value="{Binding IsGameOver, Converter={StaticResource InverseBooleanConverter}}"/>
@@ -34,6 +35,8 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
+                        <!-- Assuming GameBoard.GridRows/Columns are 9, matching these. -->
+                        <!-- For direct binding to static const, would need a helper or be in code-behind if not easily XAML-accessible -->
                         <UniformGrid Rows="9" Columns="9"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
@@ -117,8 +120,8 @@
                     Width="{Binding ElementName=GameBoardItemsControl, Path=ActualWidth}"
                     Height="{Binding ElementName=GameBoardItemsControl, Path=ActualHeight}"
                     Margin="{Binding ElementName=GameBoardItemsControl, Path=Margin}"
-                    ClipToBounds="False"
-                    Background="#33FF0000"> <!-- Bright Red, semi-transparent for diagnosis -->
+                    ClipToBounds="False">
+                    <!-- Background="#33FF0000" removed -->
             </Canvas>
 
             <TextBlock Text="Game Over!"
