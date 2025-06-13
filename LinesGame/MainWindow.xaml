@@ -24,7 +24,7 @@
 
         <!-- Game Board Area -->
         <Grid x:Name="BoardCanvasContainer" Grid.Row="0" Grid.Column="0" Margin="0,0,10,0" ClipToBounds="False">
-            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5" <!-- Added Margin -->
+            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5"
                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                           MinWidth="360" MinHeight="360"
                           BorderThickness="0" Padding="0">
