@@ -16,7 +16,6 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" /> <!-- Game area -->
-            <!-- Removed Auto height row for button, will integrate button into side panel -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" MinWidth="300"/> <!-- Game board -->
@@ -81,13 +80,11 @@
 
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
-                                        <!-- Default state (empty cell) - No visible stroke -->
                                         <Setter Property="Stroke" Value="Transparent"/>
                                         <Setter Property="StrokeThickness" Value="0"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HasBall}" Value="True">
-                                                <!-- Stroke for actual balls -->
-                                                <Setter Property="Stroke" Value="#FF333333"/> <!-- Dark Gray -->
+                                                <Setter Property="Stroke" Value="#FF333333"/>
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
@@ -98,10 +95,8 @@
                                                     <StopStoryboard BeginStoryboardName="bs_Selected_JumpAnimOn"/>
                                                     <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" x:Name="bs_Selected_JumpAnimOffReset"/>
                                                 </DataTrigger.ExitActions> -->
-                                                <!-- Add simple setters for diagnostics -->
                                                 <Setter Property="Opacity" Value="0.5"/>
                                             </DataTrigger>
-                                            <!-- Add a corresponding trigger to revert the diagnostic change when IsSelected is False -->
                                             <DataTrigger Binding="{Binding IsSelected}" Value="False">
                                                 <Setter Property="Opacity" Value="1.0"/>
                                             </DataTrigger>
@@ -121,8 +116,8 @@
             </ItemsControl>
 
             <Canvas x:Name="animationCanvas" IsHitTestVisible="False"
-                    VerticalAlignment="Stretch" <!-- Match ItemsControl -->
-                    HorizontalAlignment="Stretch" <!-- Match ItemsControl -->
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
                     Width="{Binding ElementName=GameBoardItemsControl, Path=ActualWidth}"
                     Height="{Binding ElementName=GameBoardItemsControl, Path=ActualHeight}"
                     Margin="{Binding ElementName=GameBoardItemsControl, Path=Margin}"
@@ -159,7 +154,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Ellipse Width="25" Height="25" Margin="3"> <!-- Slightly larger next balls -->
+                        <Ellipse Width="25" Height="25" Margin="3">
                             <Ellipse.Fill>
                                 <SolidColorBrush Color="{Binding}"/>
                             </Ellipse.Fill>
@@ -176,7 +171,6 @@
                     HorizontalAlignment="Center" Click="NewGameButton_Click"
                     FontWeight="SemiBold" Background="LightSteelBlue" BorderBrush="SteelBlue"/>
 
-            <!-- Removed the collapsed placeholder Border -->
         </StackPanel>
     </Grid>
 </Window>
