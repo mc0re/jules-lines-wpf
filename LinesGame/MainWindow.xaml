@@ -35,8 +35,6 @@
                 </ItemsControl.Style>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <!-- Assuming GameBoard.GridRows/Columns are 9, matching these. -->
-                        <!-- For direct binding to static const, would need a helper or be in code-behind if not easily XAML-accessible -->
                         <UniformGrid Rows="9" Columns="9"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
@@ -85,12 +83,10 @@
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                 <Setter Property="Opacity" Value="0.5"/>
                                             </DataTrigger>
-                                            <!-- No IsSelected=False trigger explicitly needed for Opacity if default is 1.0 -->
                                         </Style.Triggers>
                                     </Style>
                                 </Ellipse.Style>
 
-                                <!-- Removed Ellipse.Triggers for FrameworkElement.Loaded as sb_ResetJumpAnimation is gone -->
                                 <Ellipse.Triggers/>
                             </Ellipse>
                         </Border>
@@ -99,7 +95,7 @@
             </ItemsControl>
 
             <Canvas x:Name="animationCanvas" IsHitTestVisible="False"
-                    Margin="0" <!-- Canvas uses full container space -->
+                    Margin="0"
                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                     ClipToBounds="False">
                  <Canvas.Width>
