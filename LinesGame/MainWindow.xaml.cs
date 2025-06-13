@@ -66,12 +66,11 @@ namespace LinesGame
 
             Ellipse ghostBall = new Ellipse
             {
-                Width = 30, // Match static ball's Width
-                Height = 30, // Match static ball's Height
+                Width = 28, // New size
+                Height = 28, // New size
                 Fill = new SolidColorBrush(sourceCell.Color),
                 Stroke = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF333333")), // Dark Gray
                 StrokeThickness = 0.75, // Match static ball's HasBall=True style
-                // HorizontalAlignment/VerticalAlignment are not directly used by Canvas children positioning
             };
 
             double cellWidth = GameBoardItemsControl.ActualWidth / GameBoard.GridColumns;
