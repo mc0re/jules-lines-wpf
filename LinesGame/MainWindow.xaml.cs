@@ -131,7 +131,8 @@ namespace LinesGame
             }
             SelectedBallCell = null;
 
-            List<Cell> linesFound = Game.CheckForLines(finalDestinationCell);
+            // Use targetCell, which is path.Last() and the actual destination of the move.
+            List<Cell> linesFound = Game.CheckForLines(targetCell);
             if (linesFound.Count > 0)
             {
                 Game.ClearCells(linesFound);
@@ -140,6 +141,9 @@ namespace LinesGame
             {
                 Game.PlaceNextBallsAndGenerateNew();
             }
+
+            // Clear path visualization after all game logic for the turn is complete.
+            ClearCurrentPathVisualization();
 
             if (!Game.IsGameOver)
             {
