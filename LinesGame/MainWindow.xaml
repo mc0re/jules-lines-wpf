@@ -67,13 +67,11 @@
 
                                 <Ellipse.Resources>
                                     <Storyboard x:Key="sb_JumpAnimation" RepeatBehavior="Forever" AutoReverse="True">
-                                        <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
                                                          To="-5" Duration="0:0:0.3" />
                                     </Storyboard>
                                     <Storyboard x:Key="sb_ResetJumpAnimation">
-                                        <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
                                                          To="0" Duration="0:0:0.01" />
                                     </Storyboard>
                                 </Ellipse.Resources>
