@@ -76,8 +76,12 @@ namespace LinesGame
             double cellWidth = GameBoardItemsControl.ActualWidth / GameBoard.GridColumns;
             double cellHeight = GameBoardItemsControl.ActualHeight / GameBoard.GridRows;
 
-            double initialX = fullPath[0].Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
-            double initialY = fullPath[0].Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
+            // Get offset from GameBoardItemsControl's margin
+            double offsetX = GameBoardItemsControl.Margin.Left;
+            double offsetY = GameBoardItemsControl.Margin.Top;
+
+            double initialX = offsetX + fullPath[0].Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
+            double initialY = offsetY + fullPath[0].Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
             Canvas.SetLeft(ghostBall, initialX);
             Canvas.SetTop(ghostBall, initialY);
             animationCanvas.Children.Add(ghostBall);
@@ -89,9 +93,9 @@ namespace LinesGame
 
             for (int i = 1; i < fullPath.Count; i++)
             {
-                double pointX = fullPath[i].Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
-                double pointY = fullPath[i].Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
-                polyLineSegment.Points.Add(new Point(pointX, pointY));
+                double currentPointX = offsetX + fullPath[i].Column * cellWidth + (cellWidth - ghostBall.Width) / 2;
+                double currentPointY = offsetY + fullPath[i].Row * cellHeight + (cellHeight - ghostBall.Height) / 2;
+                polyLineSegment.Points.Add(new Point(currentPointX, currentPointY));
             }
             pathFigure.Segments.Add(polyLineSegment);
             animationPathGeometry.Figures.Add(pathFigure);

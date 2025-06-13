@@ -23,8 +23,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- Game Board Area -->
-        <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0">
-            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="0"
+        <Grid x:Name="BoardCanvasContainer" Grid.Row="0" Grid.Column="0" Margin="0,0,10,0" ClipToBounds="False">
+            <ItemsControl x:Name="GameBoardItemsControl" ItemsSource="{Binding Cells}" Margin="5" <!-- Added Margin -->
                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                           MinWidth="360" MinHeight="360"
                           BorderThickness="0" Padding="0">
@@ -67,47 +67,31 @@
                                     <SolidColorBrush Color="{Binding Color, FallbackValue=Transparent, TargetNullValue=Transparent}"/>
                                 </Ellipse.Fill>
                                 <Ellipse.RenderTransform>
-                                    <TranslateTransform Y="0"/>
+                                    <TranslateTransform Y="0"/> <!-- Retain for potential future simple Y-offset animations if needed -->
                                 </Ellipse.RenderTransform>
 
-                                <Ellipse.Resources>
-                                    <Storyboard x:Key="sb_JumpAnimation" RepeatBehavior="Forever" AutoReverse="True">
-                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                         To="-5" Duration="0:0:0.3" />
-                                    </Storyboard>
-                                    <Storyboard x:Key="sb_ResetJumpAnimation">
-                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                         To="0" Duration="0:0:0.01" />
-                                    </Storyboard>
-                                </Ellipse.Resources>
+                                <!-- Removed Ellipse.Resources for sb_JumpAnimation and sb_ResetJumpAnimation -->
 
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
                                         <Setter Property="Stroke" Value="Transparent"/>
                                         <Setter Property="StrokeThickness" Value="0"/>
+                                        <Setter Property="Opacity" Value="1.0"/> <!-- Default opacity -->
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HasBall}" Value="True">
                                                 <Setter Property="Stroke" Value="#FF333333"/>
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <DataTrigger.EnterActions>
-                                                    <BeginStoryboard Storyboard="{StaticResource sb_JumpAnimation}" x:Name="bs_Selected_JumpAnimOn" />
-                                                </DataTrigger.EnterActions>
-                                                <DataTrigger.ExitActions>
-                                                    <StopStoryboard BeginStoryboardName="bs_Selected_JumpAnimOn"/>
-                                                    <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" x:Name="bs_Selected_JumpAnimOffReset"/>
-                                                </DataTrigger.ExitActions>
+                                                <Setter Property="Opacity" Value="0.5"/>
                                             </DataTrigger>
+                                            <!-- No IsSelected=False trigger explicitly needed for Opacity if default is 1.0 -->
                                         </Style.Triggers>
                                     </Style>
                                 </Ellipse.Style>
 
-                                <Ellipse.Triggers>
-                                    <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                         <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" />
-                                    </EventTrigger>
-                                </Ellipse.Triggers>
+                                <!-- Removed Ellipse.Triggers for FrameworkElement.Loaded as sb_ResetJumpAnimation is gone -->
+                                <Ellipse.Triggers/>
                             </Ellipse>
                         </Border>
                     </DataTemplate>
@@ -115,13 +99,15 @@
             </ItemsControl>
 
             <Canvas x:Name="animationCanvas" IsHitTestVisible="False"
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Stretch"
-                    Width="{Binding ElementName=GameBoardItemsControl, Path=ActualWidth}"
-                    Height="{Binding ElementName=GameBoardItemsControl, Path=ActualHeight}"
-                    Margin="{Binding ElementName=GameBoardItemsControl, Path=Margin}"
+                    Margin="0" <!-- Canvas uses full container space -->
+                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                     ClipToBounds="False">
-                    <!-- Background="#33FF0000" removed -->
+                 <Canvas.Width>
+                    <Binding ElementName="BoardCanvasContainer" Path="ActualWidth"/>
+                 </Canvas.Width>
+                 <Canvas.Height>
+                    <Binding ElementName="BoardCanvasContainer" Path="ActualHeight"/>
+                 </Canvas.Height>
             </Canvas>
 
             <TextBlock Text="Game Over!"
