@@ -5,19 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LinesGame"
         mc:Ignorable="d"
-        Title="Lines Game" Height="450" Width="800">
-    <Grid>
+        Title="Lines Game" Height="500" Width="750" MinWidth="450" MinHeight="400">
+    <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" /> <!-- Game area -->
+            <!-- Removed Auto height row for button, will integrate button into side panel -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" MinWidth="300"/> <!-- Game board -->
+            <ColumnDefinition Width="Auto" MinWidth="180"/> <!-- Score, Next Balls, Button -->
         </Grid.ColumnDefinitions>
 
         <!-- Game Board Area -->
-        <Grid Grid.Row="0" Grid.Column="0">
+        <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,10,0"> <!-- Added margin to separate from side panel -->
             <ItemsControl ItemsSource="{Binding Cells}" Margin="5">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
@@ -36,23 +36,28 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderThickness="1" MouseLeftButtonDown="Cell_MouseLeftButtonDown">
-                            <Border.Style>
+                        <Border BorderThickness="0.5" MouseLeftButtonDown="Cell_MouseLeftButtonDown">
+                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="BorderBrush" Value="LightGray"/>
+                                    <Setter Property="BorderBrush" Value="Gray"/> <!-- Darker, more subtle border -->
                                     <Setter Property="BorderThickness" Value="0.5"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="BorderBrush" Value="DarkBlue"/>
+                                            <Setter Property="BorderBrush" Value="CornflowerBlue"/> <!-- More appealing selection color -->
                                             <Setter Property="BorderThickness" Value="2"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <Ellipse Width="30" Height="30" Margin="1">
+                            <Ellipse Width="30" Height="30" Margin="2" x:Name="ballEllipse"> <!-- Increased margin slightly -->
+                                <Ellipse.RenderTransform>
+                                    <TranslateTransform Y="0"/>
+                                </Ellipse.RenderTransform>
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
                                         <Setter Property="Fill" Value="Transparent"/>
+                                        <Setter Property="Stroke" Value="DarkGray"/> <!-- Default stroke for all ellipses -->
+                                        <Setter Property="StrokeThickness" Value="0.5"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HasBall}" Value="True">
                                                 <Setter Property="Fill">
@@ -60,6 +65,30 @@
                                                         <SolidColorBrush Color="{Binding Color}"/>
                                                     </Setter.Value>
                                                 </Setter>
+                                                <!-- Change stroke for balls to make them pop a bit more -->
+                                                <Setter Property="Stroke" Value="Black"/>
+                                                <Setter Property="StrokeThickness" Value="0.75"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard x:Name="jumpAnimationStoryboard">
+                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                            <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                                             To="-5" Duration="0:0:0.3" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="jumpAnimationStoryboard"/>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                                             To="0" Duration="0:0:0.01" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.ExitActions>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -71,9 +100,9 @@
             </ItemsControl>
 
             <TextBlock Text="Game Over!"
-                       FontSize="48" FontWeight="Bold" Foreground="Red"
+                       FontSize="48" FontWeight="Bold" Foreground="DarkRed" <!-- Slightly darker Red -->
                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                       IsHitTestVisible="False"> <!-- So it doesn't interfere with clicks if somehow visible when not game over -->
+                       IsHitTestVisible="False">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -87,35 +116,37 @@
             </TextBlock>
         </Grid>
 
-        <!-- Score and Next Balls Area -->
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
-            <TextBlock Text="{Binding Score, StringFormat='Score: {0}'}" FontSize="16" Margin="5"/>
-            <TextBlock Text="Next Balls:" FontSize="16" Margin="0,5,0,2"/>
-            <ItemsControl ItemsSource="{Binding NextBallColors}">
+        <!-- Right Panel: Score, Next Balls, Button -->
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Top">
+            <TextBlock Text="{Binding Score, StringFormat='Score: {0}'}" FontSize="20" FontWeight="SemiBold" Margin="5,5,5,10"/>
+
+            <TextBlock Text="Next Balls:" FontSize="16" Margin="5,10,5,2"/>
+            <ItemsControl ItemsSource="{Binding NextBallColors}" HorizontalAlignment="Left" Margin="5,0,5,15">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left"/>
+                        <StackPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Ellipse Width="20" Height="20" Margin="2">
+                        <Ellipse Width="25" Height="25" Margin="3"> <!-- Slightly larger next balls -->
                             <Ellipse.Fill>
                                 <SolidColorBrush Color="{Binding}"/>
                             </Ellipse.Fill>
+                            <Ellipse.Stroke>
+                                <SolidColorBrush Color="Black" />
+                            </Ellipse.Stroke>
+                            <Ellipse.StrokeThickness>0.5</Ellipse.StrokeThickness>
                         </Ellipse>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <!-- Placeholder for other info if needed -->
-            <Border BorderBrush="Gray" BorderThickness="1" Height="50" Margin="5,10,5,5" Visibility="Collapsed">
-                <TextBlock Text="Future Info" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Border>
-        </StackPanel>
 
-        <!-- Controls Area -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
-            <Button Content="New Game" Width="100" Margin="5" Click="NewGameButton_Click"/>
+            <Button Content="New Game" Width="120" Margin="5,20,5,5" Padding="10,7"
+                    HorizontalAlignment="Center" Click="NewGameButton_Click"
+                    FontWeight="SemiBold" Background="LightSteelBlue" BorderBrush="SteelBlue"/>
+
+            <!-- Removed the collapsed placeholder Border -->
         </StackPanel>
     </Grid>
 </Window>
