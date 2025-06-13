@@ -64,6 +64,23 @@
                                 <Ellipse.RenderTransform>
                                     <TranslateTransform Y="0"/>
                                 </Ellipse.RenderTransform>
+                                <Ellipse.RenderTransform>
+                                    <TranslateTransform Y="0"/>
+                                </Ellipse.RenderTransform>
+
+                                <Ellipse.Resources>
+                                    <Storyboard x:Key="sb_JumpAnimation" RepeatBehavior="Forever" AutoReverse="True">
+                                        <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                         To="-5" Duration="0:0:0.3" />
+                                    </Storyboard>
+                                    <Storyboard x:Key="sb_ResetJumpAnimation">
+                                        <DoubleAnimation Storyboard.TargetName="ballEllipse"
+                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                         To="0" Duration="0:0:0.01" />
+                                    </Storyboard>
+                                </Ellipse.Resources>
+
                                 <Ellipse.Style>
                                     <Style TargetType="Ellipse">
                                         <Setter Property="Stroke" Value="DarkGray"/>
@@ -73,40 +90,23 @@
                                                 <Setter Property="Stroke" Value="Black"/>
                                                 <Setter Property="StrokeThickness" Value="0.75"/>
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource sb_JumpAnimation}" x:Name="bs_Selected_JumpAnimOn" />
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <StopStoryboard BeginStoryboardName="bs_Selected_JumpAnimOn"/>
+                                                    <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" x:Name="bs_Selected_JumpAnimOffReset"/>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Ellipse.Style>
+
                                 <Ellipse.Triggers>
                                     <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                                         <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                 To="0" Duration="0:0:0.01" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
+                                         <BeginStoryboard Storyboard="{StaticResource sb_ResetJumpAnimation}" />
                                     </EventTrigger>
-                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard x:Name="JumpAnimOn">
-                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                                    <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                     To="-5" Duration="0:0:0.3" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <StopStoryboard BeginStoryboardName="JumpAnimOn" />
-                                            <BeginStoryboard x:Name="JumpAnimOffReset">
-                                                <Storyboard>
-                                                    <DoubleAnimation Storyboard.TargetName="ballEllipse"
-                                                                     Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                                                     To="0" Duration="0:0:0.01" />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
                                 </Ellipse.Triggers>
                             </Ellipse>
                         </Border>
